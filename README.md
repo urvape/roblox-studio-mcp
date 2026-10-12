@@ -8,10 +8,10 @@ Drive an open Roblox Studio place from the command line through Roblox's bundled
 ## Install
 
 ```bash
-npx skills add urvape/roblox-studio-mcp --skill roblox-studio-mcp --yes
+npx skills add urvape/roblox-studio-mcp --skill roblox-studio-mcp-cli --yes
 ```
 
-That copies the skill into the project's `.agents/skills/roblox-studio-mcp/`. Add `-g` to install
+That copies the skill into the project's `.agents/skills/roblox-studio-mcp-cli/`. Add `-g` to install
 it for your user rather than the current project.
 
 ## Pin a version
@@ -20,7 +20,7 @@ A release is tagged whenever the skill itself changes, so an install can be repr
 of tracking `main` — the CLI takes a Git ref after a `#`:
 
 ```bash
-npx skills add 'urvape/roblox-studio-mcp#v1.0.0' --skill roblox-studio-mcp --yes
+npx skills add 'urvape/roblox-studio-mcp#v1.0.1' --skill roblox-studio-mcp-cli --yes
 ```
 
 A branch name works in the same position, and a full 40-character commit SHA pins exactly one
@@ -29,12 +29,12 @@ revision. See the repository's Releases for the available tags.
 ## Use
 
 ```bash
-node .agents/skills/roblox-studio-mcp/scripts/rbx.mjs bridge status   # port, keeper, Studio heartbeat
-node .agents/skills/roblox-studio-mcp/scripts/rbx.mjs list           # every available tool
-node .agents/skills/roblox-studio-mcp/scripts/roblox-mcp.mjs --studios
+node .agents/skills/roblox-studio-mcp-cli/scripts/rbx.mjs bridge status   # port, keeper, Studio heartbeat
+node .agents/skills/roblox-studio-mcp-cli/scripts/rbx.mjs list           # every available tool
+node .agents/skills/roblox-studio-mcp-cli/scripts/roblox-mcp.mjs --studios
 ```
 
-See `skills/roblox-studio-mcp/SKILL.md` for the whole command surface and the safety layer
+See `skills/roblox-studio-mcp-cli/SKILL.md` for the whole command surface and the safety layer
 (`--dry-run`, `--backup`, `undo`).
 
 ## Optional: native MCP tools
@@ -43,10 +43,10 @@ The CLI needs nothing beyond Studio, but an MCP host such as Freebuff can expose
 native tools instead. That needs a launcher and a registration on the machine:
 
 ```bash
-node .agents/skills/roblox-studio-mcp/scripts/bootstrap.mjs
+node .agents/skills/roblox-studio-mcp-cli/scripts/bootstrap.mjs
 ```
 
-It writes the launcher and the `roblox-studio-mcp` registration, then reports what it cannot
+It writes the launcher and the `roblox-studio-mcp-cli` registration, then reports what it cannot
 fix for you (Studio missing, manifest not yet approved). Approve the server in the host's MCP
 panel and start a new session.
 
@@ -72,6 +72,11 @@ and proves `bootstrap.mjs --dry-run` reports what it would write without touchin
 Everything that needs Windows, Roblox Studio or the live bridge stays in the canonical tooling
 directory's `verify.mjs`, which mirrors itself into `~/.agents/skills` and probes the bridge —
 neither of which can run on a runner.
+
+## License
+
+MIT — see [LICENSE](LICENSE). The scripts run with full agent permissions, so read them before
+installing if that matters to you.
 
 ## Notes for maintainers
 

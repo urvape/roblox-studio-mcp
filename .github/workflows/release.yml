@@ -3,7 +3,7 @@ name: release
 # Publishes a tag and a GitHub Release whenever the packaged skill changes, so an install can
 # pin a version instead of tracking main:
 #
-#   npx skills add owner/repo#v1.0.0 --skill roblox-studio-mcp --yes
+#   npx skills add owner/repo#v1.0.0 --skill roblox-studio-mcp-cli --yes
 #
 # The `paths` filter keeps this quiet for changes that cannot alter what a consumer installs
 # (the README, the checks, the workflows themselves). Run it by hand — with an optional

@@ -6,7 +6,7 @@
 //
 //   %LOCALAPPDATA%\Roblox\mcp.bat        launcher Freebuff invokes to start StudioMCP.exe
 //   ~/.agents/mcp.json                   registers that launcher as the Roblox_Studio server
-//   ~/.agents/skills/roblox-studio-mcp/  the installed skill, regenerated from here
+//   ~/.agents/skills/<skill>/            the installed skill, regenerated from here
 //
 // Everything else comes back on its own: Studio's installer recreates StudioMCP.exe and the
 // registry ContentFolder key it resolves through, and signing into Freebuff restores the
@@ -71,6 +71,19 @@ const home = resolve(homeFlag ?? homedir());
 const robloxDir = resolve(robloxFlag ?? join(process.env.LOCALAPPDATA ?? join(home, "AppData", "Local"), "Roblox"));
 const batFile = join(robloxDir, BAT_NAME);
 const mcpFile = join(home, ".agents", "mcp.json");
+
+/**
+ * Installed copies of this skill under ~/.agents/skills, whatever directory name they carry.
+ * Found by signature rather than by name so a rename here cannot make this report lie — and
+ * so the shipped copy, which has no manifest to read, stays correct.
+ */
+function installedSkills(home) {
+  const root = join(home, ".agents", "skills");
+  if (!existsSync(root)) return [];
+  return readdirSync(root).filter(
+    (name) => existsSync(join(root, name, "SKILL.md")) && existsSync(join(root, name, "scripts", "bootstrap.mjs")),
+  );
+}
 
 /** Newest StudioMCP.exe under <robloxDir>\Versions, or null. */
 function newestStudioMcp(dir) {
@@ -178,6 +191,7 @@ function approvalState() {
 
 const status = await bridgeStatus();
 const heartbeat = status.heartbeat;
+const installed = installedSkills(home);
 
 const report = {
   home,
@@ -189,7 +203,8 @@ const report = {
   checks: {
     node: { version: process.versions.node, ok: nodeMajor >= 18 },
     studio: { exe, ok: Boolean(exe) },
-    skillInstalled: existsSync(join(home, ".agents", "skills", "roblox-studio-mcp", "SKILL.md")),
+    skillInstalled: installed.length > 0,
+    installedSkillDirs: installed,
     approval: approvalState(),
     bridge: {
       listening: status.listening,
@@ -210,6 +225,7 @@ if (asJson) {
   console.log(`  checks  node v${process.versions.node}${nodeMajor >= 18 ? "" : " (needs 18+)"}`);
   console.log(`          studio ${exe ? "installed" : "MISSING — install Roblox Studio, open a place once, then re-run"}`);
   console.log(`          approval ${approvalState()}`);
+  console.log(`          skill ${installed.length ? installed.join(", ") : "none under ~/.agents/skills (run sync-skill.mjs)"}`);
   console.log(
     `          bridge ${status.listening ? `listening (keeper ${status.keeperPid ?? "-"})` : "not listening"}` +
       `${heartbeat ? (heartbeat.fresh ? `, Studio heartbeat ${Math.round(heartbeat.ageMs / 1000)}s ago` : ", Studio heartbeat stale") : ""}`,

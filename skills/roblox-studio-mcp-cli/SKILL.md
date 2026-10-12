@@ -1,6 +1,7 @@
 ---
-name: roblox-studio-mcp
+name: roblox-studio-mcp-cli
 description: Use when working with a Roblox Studio place from the terminal or when Roblox Studio MCP tools are missing from the session - inspecting or editing Luau scripts, exploring the game tree, reading the Studio output, or diagnosing the localhost:13469 MCP bridge.
+license: MIT
 ---
 
 # Roblox Studio MCP

@@ -1,0 +1,25 @@
+name: checks
+
+# Every push, every pull request, and on demand from the Actions tab.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    name: node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 18.x is the tooling's documented floor; 22.x is a current LTS. There is no install
+        # step: the skill has no dependencies, so the checks run with nothing but Node.
+        node: ["18.x", "22.x"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      # syntax, spawn hygiene, skill frontmatter, the shipped CLI, and bootstrap --dry-run.
+      - run: node checks/run.mjs

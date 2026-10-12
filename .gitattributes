@@ -1,0 +1,4 @@
+# Keep the checked-out bytes identical to the canonical source on every platform. The skill
+# is copied straight out of a checkout by the `skills` CLI, and Git for Windows defaults to
+# core.autocrlf=true, which would otherwise silently rewrite every script on a clone.
+* text=auto eol=lf

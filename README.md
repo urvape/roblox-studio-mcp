@@ -1,5 +1,7 @@
 # Roblox Studio MCP skill
 
+[![checks](https://github.com/urvape/roblox-studio-mcp/actions/workflows/checks.yml/badge.svg)](https://github.com/urvape/roblox-studio-mcp/actions/workflows/checks.yml)
+
 Drive an open Roblox Studio place from the command line through Roblox's bundled
 `StudioMCP.exe` bridge — for coding agents that have no native `roblox_*` MCP tools.
 

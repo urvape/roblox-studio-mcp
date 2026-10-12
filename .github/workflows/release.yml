@@ -1,0 +1,74 @@
+name: release
+
+# Publishes a tag and a GitHub Release whenever the packaged skill changes, so an install can
+# pin a version instead of tracking main:
+#
+#   npx skills add owner/repo#v1.0.0 --skill roblox-studio-mcp --yes
+#
+# The `paths` filter keeps this quiet for changes that cannot alter what a consumer installs
+# (the README, the checks, the workflows themselves). Run it by hand — with an optional
+# explicit version — to cut something other than a patch bump.
+on:
+  push:
+    branches: [main]
+    paths: ["skills/**"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (default: patch bump of the latest tag)"
+        required: false
+        type: string
+
+permissions:
+  contents: write # creating the tag and the release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tags are what the next version is derived from
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+      # Never tag something that would fail the checks job.
+      - run: node checks/run.mjs
+      - name: Work out the next version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_VERSION:-}" ]; then
+            echo "next=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          latest="$(git tag --list 'v[0-9]*' --sort=-v:refname | head -1)"
+          if [ -z "$latest" ]; then
+            next="v1.0.0"
+          else
+            IFS=. read -r major minor patch <<< "${latest#v}"
+            next="v${major}.${minor}.$(( ${patch%%-*} + 1 ))"
+          fi
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+          echo "release: latest tag ${latest:-none} -> $next"
+      - name: Skip a commit that already carries a tag
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          tagged="$(git tag --points-at "$GITHUB_SHA" | tr '\n' ' ')"
+          if [ -n "${tagged// /}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "release: $GITHUB_SHA is already tagged ($tagged) — nothing to do"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create the release
+        if: steps.guard.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.next }}
+        run: node .github/release.mjs

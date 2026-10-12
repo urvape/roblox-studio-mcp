@@ -14,6 +14,18 @@ npx skills add urvape/roblox-studio-mcp --skill roblox-studio-mcp --yes
 That copies the skill into the project's `.agents/skills/roblox-studio-mcp/`. Add `-g` to install
 it for your user rather than the current project.
 
+## Pin a version
+
+A release is tagged whenever the skill itself changes, so an install can be reproduced instead
+of tracking `main` — the CLI takes a Git ref after a `#`:
+
+```bash
+npx skills add 'urvape/roblox-studio-mcp#v1.0.0' --skill roblox-studio-mcp --yes
+```
+
+A branch name works in the same position, and a full 40-character commit SHA pins exactly one
+revision. See the repository's Releases for the available tags.
+
 ## Use
 
 ```bash
@@ -65,4 +77,8 @@ neither of which can run on a runner.
 
 This repository is generated: `pack-skill.mjs` in the canonical tooling directory builds it
 from the same manifest that the installed skill is mirrored from, including `checks/` and the
-workflow. Regenerate and push rather than editing files here by hand.
+workflows. Regenerate and push rather than editing files here by hand.
+
+Two workflows run here: `checks` on every push and pull request, and `release`, which tags a
+version when something under `skills/` changes. Both run `node checks/run.mjs` first, so a red
+commit is never tagged.
